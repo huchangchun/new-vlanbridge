@@ -1,1 +1,10 @@
 complete by sh
+To create subinterface and add to bridge
+First select a interface connect to a Trunk Port ,for example eth1
+touch /etc/sysconfig/ifconfig-eth1.4088
+touch /etc/sysconfig/ifconfig-br1.4088
+edit ifconfig-eth1.4088 and ifconfig-br1.4088
+add vlanid 4088 to eth1
+ifconfig eth1.4088  up
+brctl addbr br1.4088
+brctl addif br1.4088 eth1.4088
