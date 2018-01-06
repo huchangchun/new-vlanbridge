@@ -1,0 +1,10 @@
+Tue, 02 Jan 2018 02:01:32 core.py[line:125] INFO input nic name: em2
+Tue, 02 Jan 2018 02:01:53 core.py[line:139] INFO input nic name: 4087
+Tue, 02 Jan 2018 02:01:53 core.py[line:55] INFO create iface /etc/sysconfig/network-scripts/ifcfg-em2.4087 ok
+Tue, 02 Jan 2018 02:01:53 core.py[line:71] INFO create Br /etc/sysconfig/network-scripts/ifcfg-br1.4087 ok
+Tue, 02 Jan 2018 02:01:53 core.py[line:90] INFO vconfig add em2 4087
+Tue, 02 Jan 2018 02:01:53 core.py[line:90] INFO ifconfig em2.4087 up
+Tue, 02 Jan 2018 02:01:53 core.py[line:90] INFO brctl addbr br1.4087
+Tue, 02 Jan 2018 02:01:53 core.py[line:90] INFO brctl addif br1.4087 em2.4087
+Tue, 02 Jan 2018 02:01:53 core.py[line:90] INFO ifconfig br1.4087 up
+Tue, 02 Jan 2018 02:02:01 core.py[line:255] INFO finnished!!
