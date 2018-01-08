@@ -143,8 +143,8 @@ function delinterface()
 	else 
 		echo "delete $vlanbr fails"
 	fi
-	rm -f /etc/sysconfig/network-scripts/ifcfgfile
-	rm -f /etc/sysconfig/network-scripts/brcfgfile
+	rm -rf /etc/sysconfig/network-scripts/ifcfgfile
+	rm -rf /etc/sysconfig/network-scripts/brcfgfile
 }
 comand_listiface="ifconfig | grep  'flags' | awk -F ':' '{print $1}"
 ch_createif='Create Interface'

@@ -28,7 +28,8 @@ def init_nics():
     WLAN_PATH= '/sys/class/net/*/wireless'
     NIC_PATH='/sys/class/net/*/device'
     global nic_list
-    nic_list = list( set(filternics(NIC_PATH)) -set(filternics(WLAN_PATH)))
+    nic_list = sorted(list( set(filternics(NIC_PATH)) -set(filternics(WLAN_PATH))))
+
 #new a file in /etc/sysconfig/network-scripts
 def newfile(lines,filepath):
     try:
@@ -36,7 +37,27 @@ def newfile(lines,filepath):
             for l in lines:
                 fw.write(l)
     except Exception as e:
-        logging.info(e)
+        logging.info('newfile failed :%s' %e)
+
+def replaceline(filepath,linetoreplace,newline):
+    try:
+    	file1=open(filepath,'r+')
+    	content_1=file1.read()
+    	file1.close()
+    	with open(filepath,'w+') as fw:
+        	content2=fw.read()
+        	fw.write(content_1.replace(linetoreplace,newline))
+        	fw.flush()
+    except Exception as e:
+	logging.info('replaceline errors %s' %s)
+	
+def appendline(filepath,newline):
+    try:
+    	with open(filepath,'r+') as fw:
+            fw.seek(0,os.SEEK_END)
+            fw.write(newline)
+    except Exception as e:
+	logging.info('appendline errors %s' %s)
 
 #new a file such as ifcfg-em1.4088
 def define_ifcfgfile(nicname,vlanId):
@@ -46,14 +67,14 @@ def define_ifcfgfile(nicname,vlanId):
     ifconfigPath = IF_CFG_FILE_PATH + ifconfgName
     L =[]
     L.append('DEVICE=' + ifname +'\n')
-    L.append('ONBOOT=yes"\n')
+    L.append('ONBOOT=yes\n')
     L.append('BRIDGE=' + brname +'\n')
-    L.append('TYPE=Ethernet"\n')
-    L.append('BOOTPROTO=static"\n')
-    L.append('NM_CONTROLLED=no"\n')
+    L.append('TYPE=Ethernet\n')
+    L.append('BOOTPROTO=static\n')
+    L.append('NM_CONTROLLED=no\n')
     newfile(L,ifconfigPath)
     logging.info("create iface %s ok" %ifconfigPath)
-
+ 
 
 #new a file such as ifcfg-br1.4088
 def define_brcfgfile(vlanId):
@@ -62,14 +83,13 @@ def define_brcfgfile(vlanId):
     brconfigPath = IF_CFG_FILE_PATH + brconfgName
     L =[]
     L.append('DEVICE=' + brname +'\n')
-    L.append('ONBOOT=yes"\n')
-    L.append('TYPE=Bridge"\n')
-    L.append('BOOTPROTO=static"\n')
-    L.append('NM_CONTROLLED=no"\n')
+    L.append('ONBOOT=yes\n')
+    L.append('TYPE=Bridge\n')
+    L.append('BOOTPROTO=static\n')
+    L.append('NM_CONTROLLED=no\n')
     L.append('NAME=' + brname+'\n')
     newfile(L,brconfigPath)
     logging.info("create Br %s ok" %brconfigPath)
-
 
 def defineEnv():
     os.system('chmod +x %s'%RC_LOCAL_PATH)
@@ -81,8 +101,9 @@ def defineEnv():
             if '8021q' in l:
                 is8021q = True
         if is8021q == False:
-            cmdline=str.format('sed -i "1a modprobe 8021q" %s' %RC_LOCAL_PATH) 
-	    call_os_run(cmdline)
+            cmdlines=['modprobe 8021q',
+                      str.format('sed -i "1a modprobe 8021q" %s' %RC_LOCAL_PATH)] 
+	    call_os_run(cmdlines)
 
 def call_os_run(commandline):
     try:
@@ -91,32 +112,39 @@ def call_os_run(commandline):
     except Exception as e:
         logging.info('call_os_run %s:%s'%(commandline,e))
 
+def listcfgfile():
+    call_os_run('ls /etc/sysconfig/network-scripts')
+
 def vconf(nicname, vlanId):
     ifacename=str.format('%s.%d'%(nicname,vlanId))
     lines = None
-    try:
-        with open(RC_LOCAL_PATH,'r') as fr:
-            lines = fr.readlines()
-    except Exception as e:
-        logging.info(e)
-    #write vconfig add %nicname %vlanid to rc.local
-    isExist = False
-    for l in lines:
-        if nicname in l and vlanId in l:
-            isExist = True
-    if isExist == False:
-        cmdline = str.format('vconfig add %s %d' %(nicname,vlanId))
-        call_os_run(cmdline)
-    cmdlines = [str.format('ifconfig %s up'%ifacename),
+    cmdlines = [str.format('vconfig add %s %d' %(nicname,vlanId)),
+                str.format('ifconfig %s up'%ifacename),
                 str.format('brctl addbr br1.%d'%vlanId),
                 str.format('brctl addif br1.%d %s' %(vlanId,ifacename)),
                 str.format('ifconfig br1.%d up' %vlanId)]
-    results=map(call_os_run,cmdlines)
+    try:
+        with open(RC_LOCAL_PATH,'r') as fr:
+            lines = fr.readlines()
+        #write vconfig add %nicname %vlanid to rc.local
+        isExist = False
+        strvlanid=str(vlanId)
+        for l in lines:
+            if nicname in l and strvlanid in l:
+                isExist = True
+        if isExist == False:
+            cmdline = str.format('vconfig add %s %d' %(nicname,vlanId))
+            appendline(RC_LOCAL_PATH,cmdline)
+        
+        ##run the cmd list
+        results=map(call_os_run,cmdlines)
+    except Exception as e:
+        logging.info('vconf failed %s' %e)
 
 def read_nicname():
     nic_name = None
     while True:
-        print("=======input Nic name as:em1")
+        print("=======input Nic name as:em2")
         nic_name = raw_input('name:')
         if nic_name in nic_list:
             break
@@ -140,14 +168,21 @@ def read_vlanId():
     return vlanId
 
 def create_Bridge():
-    
     #pdb.set_trace()
     nicname = read_nicname()
     vlanId = read_vlanId()
+    cmdline=str.format('ifconfig %s up' %nicname)
+    call_os_run(cmdline)
+    
+    ifconfgName = str.format('ifcfg-%s' %nicname)
+    ifconfigPath = IF_CFG_FILE_PATH + ifconfgName
+    replaceline(RC_LOCAL_PATH,'ONBOOT=no','ONBOOT=yes')
     define_ifcfgfile(nicname, vlanId)
     define_brcfgfile(vlanId)
     vconf(nicname,vlanId)
+    call_os_run('virsh iface-list')
     print('Finished create_Bridge !!!\n')
+
 def get_ifaces():
     # getoutput :'br0\nbr1.4088\nem1\nem2\nem2.4088\nlo\nvirbr0'
     return (commands.getoutput("ifconfig | grep 'flag' | awk -F ':' '{print $1}'")).split('\n')
@@ -155,7 +190,7 @@ def get_ifaces():
 def read_ifacename():
     iface_name = None
     while True:
-        print('=======input face name as:em1.4088')
+        print('=======input face name as:em2.4088')
         iface_name = raw_input('name:')
         if iface_name in ifaces and 'br1' not in iface_name:
             break
@@ -187,8 +222,8 @@ def remove_faces(iface_to_move,brface_to_move):
               str.format('brctl delif %s %s' %(brface_to_move,iface_to_move)),
               str.format('brctl delbr %s' %brface_to_move),
               str.format('vconfig rem %s' %iface_to_move),
-              str.format('rm -f %s' %ifcfgfile_path),
-              str.format('rm -f %s' %brcfgfile_path)]
+              str.format('rm -rf %s' %ifcfgfile_path),
+              str.format('rm -rf %s' %brcfgfile_path)]
     results = map(call_os_run,cmdlines)
     print('Finnished remove_faces !!!!\n')
 
@@ -209,16 +244,24 @@ def show_help():
        To create a vlan-bridge
        first choose a nic which is connect to a Trunk-port by 1)list nics
        then give a VlanId as: 4088
-       To remove a vlan-bridge,
+       To remove a vlan-bridge:
+       first input a ifacename like:em1.4087
+       then input a bridgename like:br1.4087
        """
     print(help_text)
 def show_options():
     userage_text="""
-======================================
- 1) list nics        2)create iface
- 3) remove iface     4) help
- 5) exit
-======================================
+==========================================
+
+ 1) list physical nics     2)create iface
+
+ 3) list interfaces        4)remove iface    
+
+ 5) help                   6)list cfgfiles
+
+ 7) exit
+
+==========================================
     """
     print(userage_text)
 def show_loop():
@@ -233,12 +276,18 @@ def show_loop():
            print(nic_list)           
         if case == 2:
             create_Bridge()
-        if case == 3:
-            remove_Bridge()
+        if case ==3:
+           ifaces=get_ifaces()
+           print('================ifaces===================')
+           print(ifaces)
         if case == 4:
-            show_help()
+            remove_Bridge()
         if case == 5:
-            break
+            show_help()
+        if case == 6:
+           listcfgfile()
+        if case == 7:
+           break
         else:
             pass
     return

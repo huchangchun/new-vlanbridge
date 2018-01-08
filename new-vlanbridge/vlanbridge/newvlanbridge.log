@@ -1,10 +1,21 @@
-Tue, 02 Jan 2018 02:01:32 core.py[line:125] INFO input nic name: em2
-Tue, 02 Jan 2018 02:01:53 core.py[line:139] INFO input nic name: 4087
-Tue, 02 Jan 2018 02:01:53 core.py[line:55] INFO create iface /etc/sysconfig/network-scripts/ifcfg-em2.4087 ok
-Tue, 02 Jan 2018 02:01:53 core.py[line:71] INFO create Br /etc/sysconfig/network-scripts/ifcfg-br1.4087 ok
-Tue, 02 Jan 2018 02:01:53 core.py[line:90] INFO vconfig add em2 4087
-Tue, 02 Jan 2018 02:01:53 core.py[line:90] INFO ifconfig em2.4087 up
-Tue, 02 Jan 2018 02:01:53 core.py[line:90] INFO brctl addbr br1.4087
-Tue, 02 Jan 2018 02:01:53 core.py[line:90] INFO brctl addif br1.4087 em2.4087
-Tue, 02 Jan 2018 02:01:53 core.py[line:90] INFO ifconfig br1.4087 up
-Tue, 02 Jan 2018 02:02:01 core.py[line:255] INFO finnished!!
+Thu, 04 Jan 2018 05:18:28 core.py[line:153] INFO input nic name: em2
+Thu, 04 Jan 2018 05:18:30 core.py[line:167] INFO input nic name: 4093
+Thu, 04 Jan 2018 05:18:30 core.py[line:111] INFO ifconfig em2 up
+Thu, 04 Jan 2018 05:18:30 core.py[line:76] INFO create iface /etc/sysconfig/network-scripts/ifcfg-em2.4093 ok
+Thu, 04 Jan 2018 05:18:30 core.py[line:92] INFO create Br /etc/sysconfig/network-scripts/ifcfg-br1.4093 ok
+Thu, 04 Jan 2018 05:18:30 core.py[line:111] INFO vconfig add em2 4093
+Thu, 04 Jan 2018 05:18:30 core.py[line:111] INFO ifconfig em2.4093 up
+Thu, 04 Jan 2018 05:18:30 core.py[line:111] INFO brctl addbr br1.4093
+Thu, 04 Jan 2018 05:18:30 core.py[line:111] INFO brctl addif br1.4093 em2.4093
+Thu, 04 Jan 2018 05:18:30 core.py[line:111] INFO ifconfig br1.4093 up
+Thu, 04 Jan 2018 05:18:31 core.py[line:111] INFO virsh iface-list
+Thu, 04 Jan 2018 05:18:41 core.py[line:199] INFO input iface_name: em2.4093
+Thu, 04 Jan 2018 05:18:45 core.py[line:211] INFO input brface_name: br1.4093
+Thu, 04 Jan 2018 05:18:45 core.py[line:111] INFO ifconfig em2.4093 down
+Thu, 04 Jan 2018 05:18:45 core.py[line:111] INFO ifconfig br1.4093 down
+Thu, 04 Jan 2018 05:18:45 core.py[line:111] INFO brctl delif br1.4093 em2.4093
+Thu, 04 Jan 2018 05:18:45 core.py[line:111] INFO brctl delbr br1.4093
+Thu, 04 Jan 2018 05:18:45 core.py[line:111] INFO vconfig rem em2.4093
+Thu, 04 Jan 2018 05:18:45 core.py[line:111] INFO rm -rf /etc/sysconfig/network-scripts/ifcfg-em2.4093
+Thu, 04 Jan 2018 05:18:45 core.py[line:111] INFO rm -rf /etc/sysconfig/network-scripts/ifcfg-br1.4093
+Thu, 04 Jan 2018 05:19:12 core.py[line:304] INFO finnished!!
