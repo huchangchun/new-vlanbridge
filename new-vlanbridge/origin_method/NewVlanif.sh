@@ -34,7 +34,8 @@ function createvlanif()
 			echo "ONBOOT=yes">>${newifcfgName}
 			echo "BRIDGE=${newbrName}" >> ${newifcfgName}
 			echo "TYPE=Ethernet" >> ${newifcfgName}  
-			echo "BOOTPROTO=static" >> ${newifcfgName}
+			echo "BOOTPROTO=none" >> ${newifcfgName}
+			echo "VLAN=YES" >> ${newifcfgName}
 			echo "NM_CONTROLLED=no" >> ${newifcfgName}
 		else
 			echo "create file ${newifcfgName} fails" 1>&2
@@ -46,7 +47,7 @@ function createvlanif()
 	
 			echo $null>${newbrcfgName}
 			echo "DEVICE=${newbrName}" >> ${newbrcfgName} 
-			echo "BOOTPROTO=static" >> ${newbrcfgName} 
+			echo "BOOTPROTO=none" >> ${newbrcfgName} 
 			echo "TYPE=Bridge" >> ${newbrcfgName}
 			echo "ONBOOT=yes" >> ${newbrcfgName}
 			echo "NAME=${newbrName}" >> ${newbrcfgName} 
