@@ -70,7 +70,8 @@ def define_ifcfgfile(nicname,vlanId):
     L.append('ONBOOT=yes\n')
     L.append('BRIDGE=' + brname +'\n')
     L.append('TYPE=Ethernet\n')
-    L.append('BOOTPROTO=static\n')
+    L.append('BOOTPROTO=none\n')
+    L.append('VLAN=yes\n')
     L.append('NM_CONTROLLED=no\n')
     newfile(L,ifconfigPath)
     logging.info("create iface %s ok" %ifconfigPath)
@@ -85,7 +86,7 @@ def define_brcfgfile(vlanId):
     L.append('DEVICE=' + brname +'\n')
     L.append('ONBOOT=yes\n')
     L.append('TYPE=Bridge\n')
-    L.append('BOOTPROTO=static\n')
+    L.append('BOOTPROTO=none\n')
     L.append('NM_CONTROLLED=no\n')
     L.append('NAME=' + brname+'\n')
     newfile(L,brconfigPath)
@@ -243,7 +244,7 @@ def show_help():
        this is a description about how to create a vlan-bridge
        To create a vlan-bridge
        first choose a nic which is connect to a Trunk-port by 1)list nics
-       then give a VlanId as: 4088
+       then give a VlanId as: 4087
        To remove a vlan-bridge:
        first input a ifacename like:em1.4087
        then input a bridgename like:br1.4087
